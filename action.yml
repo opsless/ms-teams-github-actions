@@ -1,11 +1,13 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: opsless/ms-teams-github-actions
+description: Microsoft Teams Github Actions integration
+author: opsless.io team
 inputs:
-  milliseconds: # change this
+  github-token:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: Github token
+  webhook-uri:
+    required: true
+    description: MS Teams webhook URI
 runs:
-  using: 'node12'
-  main: 'dist/index.js'
+  using: node12
+  main: dist/main/index.js
