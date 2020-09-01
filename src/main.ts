@@ -29,7 +29,8 @@ async function run() {
     const stoppedStep = job?.steps.find(s => s.conclusion === "failure" || s.conclusion === "timed_out" || s.conclusion === "cancelled" || s.conclusion === "action_required")
     const lastStep = stoppedStep ? stoppedStep : job?.steps.reverse().find(s => s.status === "completed")
 
-    core.info(JSON.stringify(jobList))
+    core.info(JSON.stringify(job))
+    core.info(JSON.stringify(lastStep))
 
     const wr = await o.actions.getWorkflowRun({
       owner: ctx.repo.owner,
