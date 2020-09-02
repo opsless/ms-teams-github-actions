@@ -11,9 +11,20 @@ function sleep(ms: number) {
 async function run() {
   try {
     const token = core.getInput("github-token");
+    if (!token) {
+      core.setFailed("'github-token' input can't be empty")
+      return
+    }
+
     const webhookUri = core.getInput("webhook-uri")
+    if (!webhookUri) {
+      core.setFailed("'webhook-uri' input can't be empty")
+      return
+    }
     const ctx = github.context;
     const o = github.getOctokit(token);
+
+    core.debug(JSON.stringify(ctx))
 
     await sleep(5000)
 
@@ -22,20 +33,22 @@ async function run() {
       owner: ctx.repo.owner,
       run_id: ctx.runId,
     });
-    
+
     const jobs = jobList.data.jobs
+    core.debug(JSON.stringify(jobs))
+    
     const job = jobs.find(job => job.name === ctx.job);
 
     const stoppedStep = job?.steps.find(s => s.conclusion === "failure" || s.conclusion === "timed_out" || s.conclusion === "cancelled" || s.conclusion === "action_required")
     const lastStep = stoppedStep ? stoppedStep : job?.steps.reverse().find(s => s.status === "completed")
-
-    core.info(JSON.stringify(jobList))
 
     const wr = await o.actions.getWorkflowRun({
       owner: ctx.repo.owner,
       repo: ctx.repo.repo,
       run_id: ctx.runId
     })
+
+    core.debug(JSON.stringify(wr.data))
 
     const repository_url = ctx.payload.repository?.html_url
     const commit_author = ctx.actor
@@ -59,7 +72,7 @@ async function run() {
             },
             {
               name: ctx.eventName === "pull_request" ? "Pull request" : "Branch",
-              value: ctx.eventName === "pull_request" ? `[${ctx.payload.pull_request?.html_url}](${ctx.payload.pull_request?.html_url})` : `${ctx.payload.repository?.html_url}/tree/${ctx.ref}`
+              value: ctx.eventName === "pull_request" ? `[${ctx.payload.pull_request?.html_url}](${ctx.payload.pull_request?.html_url})` : `[${ctx.payload.repository?.html_url}/tree/${ctx.ref}](${ctx.payload.repository?.html_url}/tree/${ctx.ref})`
             },
             {
               name: "Workflow run details",
@@ -71,6 +84,7 @@ async function run() {
       ]
     }
     const response = await axios.default.post(webhookUri, webhookBody)
+    core.debug(JSON.stringify(response.data))
     // TODO: check response status, if not succesful, mark workflow as failed
   } catch (error) {
     core.setFailed(error.message);
