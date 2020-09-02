@@ -84,7 +84,7 @@ async function run() {
       ]
     }
     const response = await axios.default.post(webhookUri, webhookBody)
-    core.debug(JSON.stringify(response))
+    core.debug(JSON.stringify(response.data))
     // TODO: check response status, if not succesful, mark workflow as failed
   } catch (error) {
     core.setFailed(error.message);
