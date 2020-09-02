@@ -27,3 +27,11 @@ jobs:
 ### Known Issues
 
 - Always set this step with `if: always()` when there are steps between `actions/checkout@v2` and this step.
+
+### Roadmap
+
+- add error message if workflow failed
+- add files changed list
+- add workflow run duration
+
+Feel free to create issue if you have an idea in mind

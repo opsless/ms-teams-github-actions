@@ -11,7 +11,16 @@ function sleep(ms: number) {
 async function run() {
   try {
     const token = core.getInput("github-token");
+    if (!token) {
+      core.setFailed("'github-token' input can't be empty")
+      return
+    }
+
     const webhookUri = core.getInput("webhook-uri")
+    if (!webhookUri) {
+      core.setFailed("'webhook-uri' input can't be empty")
+      return
+    }
     const ctx = github.context;
     const o = github.getOctokit(token);
 
