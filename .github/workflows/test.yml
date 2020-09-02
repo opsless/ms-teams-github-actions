@@ -17,7 +17,7 @@ jobs:
       - uses: ./
         if: always()
         env:
-          ACTIONS_RUNNER_DEBUG: true
+          ACTIONS_STEP_DEBUG: true
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           webhook-uri: ${{ secrets.MS_TEAMS_WEBHOOK_URI }}
