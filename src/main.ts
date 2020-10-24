@@ -53,8 +53,8 @@ async function run() {
     const repository_url = ctx.payload.repository?.html_url
     const commit_author = ctx.actor
 
-    var themeColor = lastStep?.conclusion === "success" ? "90C978": "C23B23"
-    const conclusion = lastStep?.conclusion === "success" ? "SUCCEEDED" : "FAILED"
+    var themeColor = lastStep?.conclusion === "success" ? "90C978": lastStep?.conclusion === "cancelled" ? "FFF175" : "C23B23"
+    const conclusion = lastStep?.conclusion === "success" ? "SUCCEEDED" : lastStep?.conclusion === "cancelled" ? "CANCELLED" : "FAILED"
     
     const webhookBody = {
       "@type": "MessageCard",
