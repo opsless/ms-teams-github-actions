@@ -8,6 +8,22 @@ async function sleep(ms: number): Promise<unknown> {
   })
 }
 
+enum Conclusions {
+  SUCCESS = 'success',
+  FAILURE = 'failure',
+  NEUTRAL = 'neutral',
+  CANCELLED = 'cancelled',
+  SKIPPED = 'skipped',
+  TIMED_OUT = 'timed_out',
+  ACTION_REQUIRED = 'action_required'
+}
+
+enum StepStatus {
+  QUEUED = 'queued',
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed'
+}
+
 async function run(): Promise<unknown> {
   try {
     const token = core.getInput('github-token')
@@ -37,18 +53,18 @@ async function run(): Promise<unknown> {
     const jobs = jobList.data.jobs
     core.debug(JSON.stringify(jobs))
 
-    const job = jobs.find(j => j.name === ctx.job)
+    const job = jobs.find(j => j.name.startsWith(ctx.job))
 
     const stoppedStep = job?.steps.find(
       s =>
-        s.conclusion === 'failure' ||
-        s.conclusion === 'timed_out' ||
-        s.conclusion === 'cancelled' ||
-        s.conclusion === 'action_required'
+        s.conclusion === Conclusions.FAILURE ||
+        s.conclusion === Conclusions.TIMED_OUT ||
+        s.conclusion === Conclusions.TIMED_OUT ||
+        s.conclusion === Conclusions.ACTION_REQUIRED
     )
     const lastStep = stoppedStep
       ? stoppedStep
-      : job?.steps.reverse().find(s => s.status === 'completed')
+      : job?.steps.reverse().find(s => s.status === StepStatus.COMPLETED)
 
     const wr = await o.actions.getWorkflowRun({
       owner: ctx.repo.owner,
@@ -62,15 +78,15 @@ async function run(): Promise<unknown> {
     const commit_author = ctx.actor
 
     const themeColor =
-      lastStep?.conclusion === 'success'
+      lastStep?.conclusion === Conclusions.SUCCESS
         ? '90C978'
-        : lastStep?.conclusion === 'cancelled'
+        : lastStep?.conclusion === Conclusions.CANCELLED
         ? 'FFF175'
         : 'C23B23'
     const conclusion =
-      lastStep?.conclusion === 'success'
+      lastStep?.conclusion === Conclusions.SUCCESS
         ? 'SUCCEEDED'
-        : lastStep?.conclusion === 'cancelled'
+        : lastStep?.conclusion === Conclusions.CANCELLED
         ? 'CANCELLED'
         : 'FAILED'
 
