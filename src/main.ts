@@ -53,7 +53,7 @@ async function run(): Promise<unknown> {
     const jobs = jobList.data.jobs
     core.debug(JSON.stringify(jobs))
 
-    const job = jobs.find(j => j.name === ctx.job)
+    const job = jobs.find(j => j.name.startsWith(ctx.job))
 
     const stoppedStep = job?.steps.find(
       s =>
