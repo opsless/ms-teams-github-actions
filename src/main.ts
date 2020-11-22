@@ -9,19 +9,19 @@ async function sleep(ms: number): Promise<unknown> {
 }
 
 enum Conclusions {
-  SUCCESS = "success",
-  FAILURE = "failure",
-  NEUTRAL = "neutral",
-  CANCELLED = "cancelled",
-  SKIPPED = "skipped",
-  TIMED_OUT = "timed_out",
-  ACTION_REQUIRED = "action_required"
+  SUCCESS = 'success',
+  FAILURE = 'failure',
+  NEUTRAL = 'neutral',
+  CANCELLED = 'cancelled',
+  SKIPPED = 'skipped',
+  TIMED_OUT = 'timed_out',
+  ACTION_REQUIRED = 'action_required'
 }
 
 enum StepStatus {
-  QUEUED = "queued",
-  IN_PROGRESS = "in_progress",
-  COMPLETED = "completed"
+  QUEUED = 'queued',
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed'
 }
 
 async function run(): Promise<unknown> {
