@@ -25,7 +25,7 @@
                         {
                             "type": "Image",
                             "style": "Person",
-                            "url": "${$root.author.profile_image}",
+                            "url": "${$root.author.avatar_url}",
                             "size": "Medium"
                         }
                     ],

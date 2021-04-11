@@ -93,7 +93,8 @@ const send = async () => {
       },
       author: {
         username: ctx.payload.sender?.login,
-        html_url: ctx.payload.sender?.html_url
+        html_url: ctx.payload.sender?.html_url,
+        avatar_url: ctx.payload.sender?.avatar_url
       }
     }
   })
