@@ -26,6 +26,12 @@ enum StepStatus {
   COMPLETED = 'completed'
 }
 
+enum TextBlockColor {
+  Good = 'good',
+  Attention = 'attention',
+  Warning = 'warning'
+}
+
 const send = async () => {
   await sleep(5000)
   const token = core.getInput('github-token')
@@ -66,6 +72,13 @@ const send = async () => {
       ? 'CANCELLED'
       : 'FAILED'
 
+  const conclusion_color =
+    lastStep?.conclusion === Conclusions.SUCCESS
+      ? TextBlockColor.Good
+      : lastStep?.conclusion === Conclusions.CANCELLED
+      ? TextBlockColor.Warning
+      : TextBlockColor.Attention
+
   const rawdata = fs.readFileSync('./ac.json').toString()
   const template = new Template(rawdata)
   const content = template.expand({
@@ -81,6 +94,7 @@ const send = async () => {
       workflow: {
         name: ctx.workflow,
         conclusion,
+        conclusion_color: conclusion_color,
         run_number: ctx.runNumber,
         run_html_url: wr.data.html_url
       },
