@@ -118,7 +118,7 @@ const send = async () => {
     attachments: [
       {
         contentType: 'application/vnd.microsoft.card.adaptive',
-        content
+        content: JSON.parse(content)
       }
     ]
   }
