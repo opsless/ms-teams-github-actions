@@ -94,7 +94,7 @@ const send = async () => {
       workflow: {
         name: ctx.workflow,
         conclusion,
-        conclusion_color: conclusion_color,
+        conclusion_color,
         run_number: ctx.runNumber,
         run_html_url: wr.data.html_url
       },
