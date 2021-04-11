@@ -5,6 +5,7 @@ on: # rebuild any PRs and main branch changes
     branches:
       - main
       - 'releases/*'
+      - feat/new-ui
 jobs:
   build:
     runs-on: ubuntu-latest
