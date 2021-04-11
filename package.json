@@ -1,6 +1,6 @@
 {
   "name": "@opsless/ms-teams-github-actions",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "private": true,
   "description": "MS Teams Github Actions integration",
   "main": "lib/main.js",
@@ -18,7 +18,9 @@
   "dependencies": {
     "@actions/core": "^1.2.6",
     "@actions/github": "^4.0.0",
-    "axios": "^0.21.1"
+    "adaptivecards-templating": "^2.1.0",
+    "axios": "^0.21.1",
+    "cockatiel": "^2.0.1"
   },
   "devDependencies": {
     "@types/jest": "^26.0.7",
