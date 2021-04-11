@@ -12,7 +12,7 @@
         },
         {
             "type": "TextBlock",
-            "text": "on [${$root.repository.name}](${$root.repository.html_url)",
+            "text": "on [${$root.repository.name}](${$root.repository.html_url})",
             "wrap": true,
             "spacing": "None"
         },
