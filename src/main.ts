@@ -113,9 +113,7 @@ const send = async () => {
     }
   })
 
-  core.info(JSON.stringify(content))
-
-  const response = await axios.default.post(webhookUri, {
+  const webhookBody = {
     type: 'message',
     attachments: [
       {
@@ -123,7 +121,11 @@ const send = async () => {
         content
       }
     ]
-  })
+  }
+
+  core.info(JSON.stringify(webhookBody))
+
+  const response = await axios.default.post(webhookUri, webhookBody)
   core.info(JSON.stringify(response.data))
 }
 
