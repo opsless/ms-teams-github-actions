@@ -6,7 +6,7 @@
             "size": "large",
             "weight": "bolder",
             "text": "Workflow '${$root.workflow.name}' #${$root.workflow.run_number} ${$root.workflow.conclusion}",
-            "color": "${root.workflow.conclusion_color}",
+            "color": "${$root.workflow.conclusion_color}",
             "fontType": "Default",
             "separator": true
         },
