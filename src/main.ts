@@ -98,15 +98,18 @@ const send = async () => {
     }
   })
 
-  const response = await axios.default.post(webhookUri, {
-    type: 'message',
-    attachments: [
-      {
-        contentType: 'application/vnd.microsoft.card.adaptive',
-        content
-      }
-    ]
-  })
+  const response = await axios.default.post(
+    webhookUri,
+    JSON.stringify({
+      type: 'message',
+      attachments: [
+        {
+          contentType: 'application/vnd.microsoft.card.adaptive',
+          content
+        }
+      ]
+    })
+  )
   core.info(JSON.stringify(response.data))
 }
 
