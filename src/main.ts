@@ -66,7 +66,7 @@ const send = async () => {
       ? 'CANCELLED'
       : 'FAILED'
 
-  const rawdata = fs.readFileSync('ac.json')
+  const rawdata = fs.readFileSync('./ac.json')
   const template = new Template(rawdata)
   const content = template.expand({
     $root: {
