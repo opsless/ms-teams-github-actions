@@ -1,6 +1,9 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as axios from 'axios'
+const fs = require('fs');
+import { Policy } from 'cockatiel'
+import { Template } from 'adaptivecards-templating'
 
 async function sleep(ms: number): Promise<unknown> {
   return new Promise(resolve => {
@@ -24,36 +27,27 @@ enum StepStatus {
   COMPLETED = 'completed'
 }
 
-async function run(): Promise<unknown> {
-  try {
-    const token = core.getInput('github-token')
-    if (!token) {
-      core.setFailed("'github-token' input can't be empty")
-      return
-    }
+enum TextBlockColor {
+  GOOD = 'Good',
+  WARNING = 'Warning',
+  ATTENTION = 'Attention'
+}
 
-    const webhookUri = core.getInput('webhook-uri')
-    if (!webhookUri) {
-      core.setFailed("'webhook-uri' input can't be empty")
-      return
-    }
-    const ctx = github.context
-    const o = github.getOctokit(token)
+const send = async () => {
+  await sleep(5000);
+  const token = core.getInput('github-token')
+  const webhookUri = core.getInput('webhook-uri')
+  const o = github.getOctokit(token)
+  const ctx = github.context
+  const jobList = await o.actions.listJobsForWorkflowRun({
+    repo: ctx.repo.repo,
+    owner: ctx.repo.owner,
+    run_id: ctx.runId
+  })
 
-    core.debug(JSON.stringify(ctx))
+  const jobs = jobList.data.jobs
 
-    await sleep(5000)
-
-    const jobList = await o.actions.listJobsForWorkflowRun({
-      repo: ctx.repo.repo,
-      owner: ctx.repo.owner,
-      run_id: ctx.runId
-    })
-
-    const jobs = jobList.data.jobs
-    core.debug(JSON.stringify(jobs))
-
-    const job = jobs.find(j => j.name.startsWith(ctx.job))
+  const job = jobs.find(j => j.name.startsWith(ctx.job))
 
     const stoppedStep = job?.steps.find(
       s =>
@@ -72,60 +66,60 @@ async function run(): Promise<unknown> {
       run_id: ctx.runId
     })
 
-    core.debug(JSON.stringify(wr.data))
+  const conclusion =
+  lastStep?.conclusion === Conclusions.SUCCESS
+    ? 'SUCCEEDED'
+    : lastStep?.conclusion === Conclusions.CANCELLED
+      ? 'CANCELLED'
+      : 'FAILED'
 
-    const repository_url = ctx.payload.repository?.html_url
-    const commit_author = ctx.actor
-
-    const themeColor =
-      lastStep?.conclusion === Conclusions.SUCCESS
-        ? '90C978'
-        : lastStep?.conclusion === Conclusions.CANCELLED
-        ? 'FFF175'
-        : 'C23B23'
-    const conclusion =
-      lastStep?.conclusion === Conclusions.SUCCESS
-        ? 'SUCCEEDED'
-        : lastStep?.conclusion === Conclusions.CANCELLED
-        ? 'CANCELLED'
-        : 'FAILED'
-
-    const webhookBody = {
-      '@type': 'MessageCard',
-      '@context': 'http://schema.org/extensions',
-      themeColor: `${themeColor}`,
-      summary: `${commit_author} commited new changes`,
-      sections: [
-        {
-          activityTitle: `Workflow '${ctx.workflow}' #${ctx.runNumber} ${conclusion}`,
-          activitySubtitle: `on [${ctx.payload.repository?.full_name}](${repository_url})`,
-          facts: [
-            {
-              name: 'Commit',
-              value: `[${wr.data.head_commit.message}](${wr.data.repository.html_url}/commit/${wr.data.head_sha}) by [${ctx.payload.sender?.login}](${ctx.payload.sender?.html_url})`
-            },
-            {
-              name:
-                ctx.eventName === 'pull_request' ? 'Pull request' : 'Branch',
-              value:
-                ctx.eventName === 'pull_request'
-                  ? `[${ctx.payload.pull_request?.html_url}](${ctx.payload.pull_request?.html_url})`
-                  : `[${ctx.payload.repository?.html_url}/tree/${ctx.ref}](${ctx.payload.repository?.html_url}/tree/${ctx.ref})`
-            },
-            {
-              name: 'Workflow run details',
-              value: `[${wr.data.html_url}](${wr.data.html_url})`
-            }
-          ],
-          markdown: true
-        }
-      ]
+  let rawdata = fs.readFileSync('ac.json');
+  const template = new Template(rawdata)
+  const content = template.expand({
+    $root: {
+      repository: {
+        name: ctx.payload.repository?.full_name,
+        html_url: ctx.payload.repository?.html_url
+      },
+      commit: {
+        message: wr.data.head_commit.message,
+        html_url: `${wr.data.repository.html_url}/commit/${wr.data.head_sha}`,
+      },
+      workflow: {
+        name: ctx.workflow,
+        conclusion: conclusion,
+        run_number: ctx.runNumber,
+        run_html_url: wr.data.html_url
+      },
+      event: {
+        type: ctx.eventName === 'pull_request' ? 'Pull request' : 'Branch',
+        html_url: ctx.eventName === 'pull_request' ? ctx.payload.pull_request?.html_url:  `${ctx.payload.repository?.html_url}/tree/${ctx.ref}`
+      },
+      author: {
+        username: ctx.payload.sender?.login,
+        html_url: ctx.payload.sender?.html_url
+      }
     }
-    const response = await axios.default.post(webhookUri, webhookBody)
-    core.debug(JSON.stringify(response.data))
-    // TODO: check response status, if not succesful, mark workflow as failed
+  })
+
+  const response = await axios.default.post(webhookUri, {
+    type:"message",
+    attachments:[
+      {
+         contentType:"application/vnd.microsoft.card.adaptive",
+         content: content
+      }
+    ]
+  })
+  core.info(JSON.stringify(response.data))
+}
+
+async function run() {
+  try {
+    await send();
   } catch (error) {
-    core.setFailed(error.message)
+    console.error(error);
+    core.setFailed(error.message);
   }
 }
 
