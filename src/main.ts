@@ -98,7 +98,7 @@ const send = async () => {
     }
   })
 
-  core.info(content)
+  core.info(JSON.stringify(content))
 
   const response = await axios.default.post(
     webhookUri,
