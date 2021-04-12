@@ -139,6 +139,8 @@ const send = async () => {
     run_id: ctx.runId
   })
 
+  core.info(wr.data.head_commit.message)
+
   const conclusion =
     lastStep?.conclusion === Conclusions.SUCCESS
       ? 'SUCCEEDED'
