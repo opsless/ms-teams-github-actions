@@ -139,7 +139,8 @@ const send = async () => {
     run_id: ctx.runId
   })
 
-  core.info(wr.data.head_commit.message)
+  const full_commit_message = wr.data.head_commit.message || ''
+  const commit_message = full_commit_message.split('\n')[0]
 
   const conclusion =
     lastStep?.conclusion === Conclusions.SUCCESS
@@ -164,7 +165,7 @@ const send = async () => {
         html_url: ctx.payload.repository?.html_url
       },
       commit: {
-        message: wr.data.head_commit.message,
+        message: commit_message,
         html_url: `${wr.data.repository.html_url}/commit/${wr.data.head_sha}`
       },
       workflow: {
