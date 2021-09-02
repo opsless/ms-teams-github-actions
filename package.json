@@ -1,6 +1,6 @@
 {
   "name": "@opsless/ms-teams-github-actions",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "private": true,
   "description": "MS Teams Github Actions integration",
   "main": "lib/main.js",
