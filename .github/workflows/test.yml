@@ -27,3 +27,4 @@ jobs:
         if: always()
         with:
           github-token: ${{ github.token }}
+          webhook-uri: 'R'
