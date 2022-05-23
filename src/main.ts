@@ -110,6 +110,9 @@ const send = async () => {
   await sleep(5000)
   const token = core.getInput('github-token')
   const webhookUri = core.getInput('webhook-uri')
+  if (!webhookUri) {
+    throw new Error('Missing MS Teams webhook URI')
+  }
   const o = github.getOctokit(token)
   const ctx = github.context
   const jobList = await o.actions.listJobsForWorkflowRun({
