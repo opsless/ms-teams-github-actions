@@ -1,0 +1,15 @@
+name: Test published action
+on:
+  push:
+jobs:
+  test_notification:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: MS Notification
+        uses: opsless/ms-teams-github-actions@main
+        if: always()
+        with:
+          github-token: ${{ github.token }}
+          webhook-uri: ${{ secrets.MS_TEAMS_WEBHOOK_URI }}
