@@ -1,6 +1,5 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import * as axios from 'axios'
 import {Template} from 'adaptivecards-templating'
 
 const temlpateData = {
@@ -10,8 +9,7 @@ const temlpateData = {
       type: 'TextBlock',
       size: 'large',
       weight: 'bolder',
-      text:
-        "Workflow '${$root.workflow.name}' #${$root.workflow.run_number} ${$root.workflow.conclusion}",
+      text: "Workflow '${$root.workflow.name}' #${$root.workflow.run_number} ${$root.workflow.conclusion}",
       color: '${$root.workflow.conclusion_color}',
       fontType: 'Default',
       separator: true
@@ -75,7 +73,7 @@ const temlpateData = {
     }
   ],
   $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
-  version: '1.2'
+  version: '1.4'
 }
 
 async function sleep(ms: number): Promise<unknown> {
@@ -115,7 +113,7 @@ const send = async () => {
   }
   const o = github.getOctokit(token)
   const ctx = github.context
-  const jobList = await o.actions.listJobsForWorkflowRun({
+  const jobList = await o.rest.actions.listJobsForWorkflowRun({
     repo: ctx.repo.repo,
     owner: ctx.repo.owner,
     run_id: ctx.runId
@@ -125,7 +123,7 @@ const send = async () => {
 
   const job = jobs.find(j => j.name.startsWith(ctx.job))
 
-  const stoppedStep = job?.steps.find(
+  const stoppedStep = job?.steps?.find(
     s =>
       s.conclusion === Conclusions.FAILURE ||
       s.conclusion === Conclusions.TIMED_OUT ||
@@ -134,15 +132,15 @@ const send = async () => {
   )
   const lastStep = stoppedStep
     ? stoppedStep
-    : job?.steps.reverse().find(s => s.status === StepStatus.COMPLETED)
+    : job?.steps?.reverse().find(s => s.status === StepStatus.COMPLETED)
 
-  const wr = await o.actions.getWorkflowRun({
+  const wr = await o.rest.actions.getWorkflowRun({
     owner: ctx.repo.owner,
     repo: ctx.repo.repo,
     run_id: ctx.runId
   })
 
-  const full_commit_message = wr.data.head_commit.message || ''
+  const full_commit_message = wr.data?.head_commit?.message || ''
   const commit_message = full_commit_message.split('\n')[0]
 
   const conclusion =
@@ -205,14 +203,25 @@ const send = async () => {
 
   core.info(JSON.stringify(webhookBody))
 
-  const response = await axios.default.post(webhookUri, webhookBody)
-  core.info(JSON.stringify(response.data))
+  const timeout = 5000;
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  const response = await fetch(webhookUri, {
+    method: 'POST',
+    body: JSON.stringify(webhookBody),
+    headers: {'Content-Type': 'application/json'},
+    signal: controller.signal
+  })
+  const responseData = await response.json()
+  clearTimeout(id);
+  core.info(JSON.stringify(responseData))
 }
 
 async function run() {
   try {
     await send()
-  } catch (error) {
+  } catch (error: any) {
     core.error(error)
     core.setFailed(error.message)
   }
