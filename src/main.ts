@@ -1,6 +1,5 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import * as axios from 'axios'
 import {Template} from 'adaptivecards-templating'
 
 const temlpateData = {
@@ -75,7 +74,7 @@ const temlpateData = {
     }
   ],
   $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
-  version: '1.2'
+  version: '1.4'
 }
 
 async function sleep(ms: number): Promise<unknown> {
@@ -205,8 +204,12 @@ const send = async () => {
 
   core.info(JSON.stringify(webhookBody))
 
-  const response = await axios.default.post(webhookUri, webhookBody)
-  core.info(JSON.stringify(response.data))
+  const response = await fetch(webhookUri, {
+    method: 'POST',
+    body: JSON.stringify(webhookBody)
+  })
+  const responseData = await response.json();
+  core.info(JSON.stringify(responseData))
 }
 
 async function run() {
