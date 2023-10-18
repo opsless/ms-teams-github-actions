@@ -203,12 +203,18 @@ const send = async () => {
 
   core.info(JSON.stringify(webhookBody))
 
+  const timeout = 5000;
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
   const response = await fetch(webhookUri, {
     method: 'POST',
     body: JSON.stringify(webhookBody),
-    headers: {'Content-Type': 'application/json'}
+    headers: {'Content-Type': 'application/json'},
+    signal: controller.signal
   })
   const responseData = await response.json()
+  clearTimeout(id);
   core.info(JSON.stringify(responseData))
 }
 
