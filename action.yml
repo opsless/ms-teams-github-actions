@@ -9,7 +9,7 @@ inputs:
     required: true
     description: MS Teams webhook URI
 runs:
-  using: node16
+  using: node20
   main: dist/main/index.js
 branding:
   icon: truck

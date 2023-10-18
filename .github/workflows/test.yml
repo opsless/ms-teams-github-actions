@@ -6,17 +6,13 @@ on: # rebuild any PRs and main branch changes
       - main
       - 'releases/*'
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
   test: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [8, 10, 12, 14, 16, 18]
+        node: [8, 10, 12, 14, 16, 18, 20]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup node
         uses: actions/setup-node@v3
