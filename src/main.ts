@@ -9,8 +9,7 @@ const temlpateData = {
       type: 'TextBlock',
       size: 'large',
       weight: 'bolder',
-      text:
-        "Workflow '${$root.workflow.name}' #${$root.workflow.run_number} ${$root.workflow.conclusion}",
+      text: "Workflow '${$root.workflow.name}' #${$root.workflow.run_number} ${$root.workflow.conclusion}",
       color: '${$root.workflow.conclusion_color}',
       fontType: 'Default',
       separator: true
@@ -114,7 +113,7 @@ const send = async () => {
   }
   const o = github.getOctokit(token)
   const ctx = github.context
-  const jobList = await o.actions.listJobsForWorkflowRun({
+  const jobList = await o.rest.actions.listJobsForWorkflowRun({
     repo: ctx.repo.repo,
     owner: ctx.repo.owner,
     run_id: ctx.runId
@@ -124,7 +123,7 @@ const send = async () => {
 
   const job = jobs.find(j => j.name.startsWith(ctx.job))
 
-  const stoppedStep = job?.steps.find(
+  const stoppedStep = job?.steps?.find(
     s =>
       s.conclusion === Conclusions.FAILURE ||
       s.conclusion === Conclusions.TIMED_OUT ||
@@ -133,15 +132,15 @@ const send = async () => {
   )
   const lastStep = stoppedStep
     ? stoppedStep
-    : job?.steps.reverse().find(s => s.status === StepStatus.COMPLETED)
+    : job?.steps?.reverse().find(s => s.status === StepStatus.COMPLETED)
 
-  const wr = await o.actions.getWorkflowRun({
+  const wr = await o.rest.actions.getWorkflowRun({
     owner: ctx.repo.owner,
     repo: ctx.repo.repo,
     run_id: ctx.runId
   })
 
-  const full_commit_message = wr.data.head_commit.message || ''
+  const full_commit_message = wr.data?.head_commit?.message || ''
   const commit_message = full_commit_message.split('\n')[0]
 
   const conclusion =
@@ -206,16 +205,17 @@ const send = async () => {
 
   const response = await fetch(webhookUri, {
     method: 'POST',
-    body: JSON.stringify(webhookBody)
+    body: JSON.stringify(webhookBody),
+    headers: {'Content-Type': 'application/json'}
   })
-  const responseData = await response.json();
+  const responseData = await response.json()
   core.info(JSON.stringify(responseData))
 }
 
 async function run() {
   try {
     await send()
-  } catch (error) {
+  } catch (error: any) {
     core.error(error)
     core.setFailed(error.message)
   }
