@@ -203,7 +203,7 @@ const send = async () => {
 
   core.info(JSON.stringify(webhookBody))
 
-  const timeout = 0;
+  const timeout = 5000;
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
 
