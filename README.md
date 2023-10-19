@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: opsless/ms-teams-github-actions@main
         if: always() # to let this step always run even if previous step failed
         with:
