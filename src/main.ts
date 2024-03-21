@@ -111,6 +111,10 @@ const send = async () => {
   if (!webhookUri) {
     throw new Error('Missing MS Teams webhook URI')
   }
+  const workflowConclusion = core.getInput('workflow-conclusion')
+  if (workflowConclusion && !Object.values(Conclusions).includes(workflowConclusion)) {
+    throw new Error("'workflow-status' input must specify on of these values: " Object.values(Conclusions).join(', '))
+  }
   const o = github.getOctokit(token)
   const ctx = github.context
   const jobList = await o.rest.actions.listJobsForWorkflowRun({
@@ -144,11 +148,13 @@ const send = async () => {
   const commit_message = full_commit_message.split('\n')[0]
 
   const conclusion =
-    lastStep?.conclusion === Conclusions.SUCCESS
-      ? 'SUCCEEDED'
-      : lastStep?.conclusion === Conclusions.CANCELLED
-        ? 'CANCELLED'
-        : 'FAILED'
+    workflowConclusion
+      ? workflowConclusion
+      : lastStep?.conclusion === Conclusions.SUCCESS
+        ? 'SUCCEEDED'
+        : lastStep?.conclusion === Conclusions.CANCELLED
+          ? 'CANCELLED'
+          : 'FAILED'
 
   const conclusion_color =
     lastStep?.conclusion === Conclusions.SUCCESS
