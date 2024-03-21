@@ -147,15 +147,15 @@ const send = async () => {
     lastStep?.conclusion === Conclusions.SUCCESS
       ? 'SUCCEEDED'
       : lastStep?.conclusion === Conclusions.CANCELLED
-      ? 'CANCELLED'
-      : 'FAILED'
+        ? 'CANCELLED'
+        : 'FAILED'
 
   const conclusion_color =
     lastStep?.conclusion === Conclusions.SUCCESS
       ? TextBlockColor.Good
       : lastStep?.conclusion === Conclusions.CANCELLED
-      ? TextBlockColor.Warning
-      : TextBlockColor.Attention
+        ? TextBlockColor.Warning
+        : TextBlockColor.Attention
 
   const rawdata = JSON.stringify(temlpateData)
   const template = new Template(rawdata)
@@ -203,9 +203,9 @@ const send = async () => {
 
   core.info(JSON.stringify(webhookBody))
 
-  const timeout = 30000;
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
+  const timeout = 30000
+  const controller = new AbortController()
+  const id = setTimeout(() => controller.abort(), timeout)
 
   const response = await fetch(webhookUri, {
     method: 'POST',
@@ -214,7 +214,7 @@ const send = async () => {
     signal: controller.signal
   })
   const responseData = await response.json()
-  clearTimeout(id);
+  clearTimeout(id)
   core.info(JSON.stringify(responseData))
 }
 
