@@ -213,7 +213,27 @@ const send = async () => {
     headers: {'Content-Type': 'application/json'},
     signal: controller.signal
   })
-  const responseData = await response.json()
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(
+      `MS Teams webhook request failed with status ${response.status}: ${errorText}`
+    )
+  }
+
+  let responseData
+  const responseText = await response.text()
+  if (responseText) {
+    try {
+      responseData = JSON.parse(responseText)
+    } catch (e) {
+      core.warning(`Failed to parse response as JSON: ${responseText}`)
+      responseData = {text: responseText}
+    }
+  } else {
+    responseData = {message: 'Empty response received'}
+  }
+
   clearTimeout(id)
   core.info(JSON.stringify(responseData))
 }
