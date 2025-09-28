@@ -1,6 +1,6 @@
 {
   "name": "@opsless/ms-teams-github-actions",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "description": "MS Teams Github Actions integration",
   "type": "module",

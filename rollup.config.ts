@@ -1,14 +1,16 @@
-import { defineConfig } from 'rollup'
-import typescript from '@rollup/plugin-typescript'
-import { nodeResolve } from '@rollup/plugin-node-resolve'
-import commonjs from '@rollup/plugin-commonjs'
+// See: https://rollupjs.org/introduction/
 
-export default defineConfig({
+import commonjs from '@rollup/plugin-commonjs'
+import nodeResolve from '@rollup/plugin-node-resolve'
+import typescript from '@rollup/plugin-typescript'
+
+const config = {
   input: 'src/main.ts',
   output: {
+    esModule: true,
     file: 'dist/index.js',
     format: 'es',
-    banner: '#!/usr/bin/env node'
+    sourcemap: true
   },
   external: [
     '@actions/core',
@@ -18,13 +20,7 @@ export default defineConfig({
     'adaptivecards-templating',
     'cockatiel'
   ],
-  plugins: [
-    nodeResolve({
-      preferBuiltins: true
-    }),
-    commonjs(),
-    typescript({
-      tsconfig: './tsconfig.json'
-    })
-  ]
-})
+  plugins: [typescript(), nodeResolve({ preferBuiltins: true }), commonjs()]
+}
+
+export default config
