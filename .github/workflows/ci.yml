@@ -48,6 +48,21 @@ jobs:
         id: checkout
         uses: actions/checkout@v5
 
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install Dependencies
+        id: npm-ci
+        run: npm ci
+
+      - name: Build Action
+        id: build
+        run: npm run package
+
       - name: Test Local Action
         id: test-action
         uses: ./
