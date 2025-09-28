@@ -2,7 +2,10 @@
 
 ### Usage
 
-1. Add `MS_TEAMS_WEBHOOK_URI` on your repository's configs on Settings > Secrets. It is the [webhook URI](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook) of the dedicated Microsoft Teams channel for notification.
+1. Add `MS_TEAMS_WEBHOOK_URI` on your repository's configs on Settings >
+   Secrets. It is the
+   [webhook URI](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook)
+   of the dedicated Microsoft Teams channel for notification.
 
 2) Add a new `step` on your workflow code as last step of workflow job:
 
@@ -26,7 +29,8 @@ jobs:
 
 ### Known Issues
 
-- Always set this step with `if: always()` when there are steps between `actions/checkout@v2` and this step.
+- Always set this step with `if: always()` when there are steps between
+  `actions/checkout@v2` and this step.
 
 ### Roadmap
 
