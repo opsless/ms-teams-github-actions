@@ -10,7 +10,7 @@ inputs:
     description: MS Teams webhook URI
 runs:
   using: node24
-  main: dist/main/index.js
+  main: dist/index.js
 branding:
   icon: truck
   color: green
