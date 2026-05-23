@@ -1,22 +1,31 @@
 {
   "name": "@opsless/ms-teams-github-actions",
   "version": "2.0.0",
+  "type": "module",
   "private": true,
   "description": "MS Teams Github Actions integration",
-  "main": "lib/main.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
-    "build": "tsc",
-    "format": "prettier --write **/*.ts",
-    "format-check": "prettier --check **/*.ts",
-    "lint": "eslint src/**/*.ts",
-    "package": "ncc build src/main.ts -m -o dist/main",
-    "test": "jest",
-    "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
+    "bundle": "npm run format:write && npm run package",
+    "ci-test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest",
+    "coverage": "npx make-coverage-badge --output-path ./badges/coverage.svg",
+    "format:write": "npx prettier --write .",
+    "format:check": "npx prettier --check .",
+    "lint": "npx eslint .",
+    "package": "npx rimraf ./dist && npx rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
+    "package:watch": "npm run package -- --watch",
+    "test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest",
+    "all": "npm run format:write && npm run lint && npm run test && npm run coverage && npm run package"
   },
   "author": "opsless.io team",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.10.1",
+    "@actions/core": "^3.0.0",
     "@actions/github": "^6.0.0",
     "adaptive-expressions": "^4.20.1",
     "adaptivecards": "^3.0.1",
@@ -24,19 +33,31 @@
     "cockatiel": "^3.1.1"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.6",
-    "@types/node": "^24.5.2",
-    "@typescript-eslint/parser": "^6.8.0",
-    "@vercel/ncc": "^0.38.0",
-    "eslint": "^8.51.0",
-    "eslint-plugin-github": "^4.10.1",
-    "eslint-plugin-jest": "^27.4.2",
-    "eslint-plugin-prettier": "^5.0.1",
-    "jest": "^29.7.0",
-    "jest-circus": "^29.7.0",
-    "js-yaml": "^4.1.0",
-    "prettier": "3.2.5",
-    "ts-jest": "^29.1.1",
-    "typescript": "^5.2.2"
+    "@eslint/compat": "^2.0.2",
+    "@eslint/eslintrc": "^3.3.3",
+    "@eslint/js": "^10.0.1",
+    "@jest/globals": "^30.2.0",
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.2.3",
+    "@typescript-eslint/eslint-plugin": "^8.56.0",
+    "eslint": "^10.0.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jest": "^29.15.0",
+    "eslint-plugin-prettier": "^5.5.5",
+    "jest": "^30.2.0",
+    "make-coverage-badge": "^1.2.0",
+    "prettier": "^3.8.1",
+    "rimraf": "^6.0.1",
+    "rollup": "^4.57.1",
+    "ts-jest": "^29.4.6",
+    "ts-jest-resolver": "^2.0.1",
+    "typescript": "^5.9.3"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "*"
   }
 }
