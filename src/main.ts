@@ -1,6 +1,5 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import { Template } from 'adaptivecards-templating'
 
 const temlpateData = {
   type: 'AdaptiveCard',
@@ -157,38 +156,45 @@ const send = async () => {
         ? TextBlockColor.Warning
         : TextBlockColor.Attention
 
-  const rawdata = JSON.stringify(temlpateData)
-  const template = new Template(rawdata)
-  const content = template.expand({
-    $root: {
-      repository: {
-        name: ctx.payload.repository?.full_name,
-        html_url: ctx.payload.repository?.html_url
-      },
-      commit: {
-        message: commit_message,
-        html_url: `${wr.data.repository.html_url}/commit/${wr.data.head_sha}`
-      },
-      workflow: {
-        name: ctx.workflow,
-        conclusion,
-        conclusion_color,
-        run_number: ctx.runNumber,
-        run_html_url: wr.data.html_url
-      },
-      event: {
-        type: ctx.eventName === 'pull_request' ? 'Pull request' : 'Branch',
-        html_url:
-          ctx.eventName === 'pull_request'
-            ? ctx.payload.pull_request?.html_url
-            : `${ctx.payload.repository?.html_url}/tree/${ctx.ref}`
-      },
-      author: {
-        username: ctx.payload.sender?.login,
-        html_url: ctx.payload.sender?.html_url,
-        avatar_url: ctx.payload.sender?.avatar_url
-      }
+  const data = {
+    repository: {
+      name: ctx.payload.repository?.full_name,
+      html_url: ctx.payload.repository?.html_url
+    },
+    commit: {
+      message: commit_message,
+      html_url: `${wr.data.repository.html_url}/commit/${wr.data.head_sha}`
+    },
+    workflow: {
+      name: ctx.workflow,
+      conclusion,
+      conclusion_color,
+      run_number: ctx.runNumber,
+      run_html_url: wr.data.html_url
+    },
+    event: {
+      type: ctx.eventName === 'pull_request' ? 'Pull request' : 'Branch',
+      html_url:
+        ctx.eventName === 'pull_request'
+          ? ctx.payload.pull_request?.html_url
+          : `${ctx.payload.repository?.html_url}/tree/${ctx.ref}`
+    },
+    author: {
+      username: ctx.payload.sender?.login,
+      html_url: ctx.payload.sender?.html_url,
+      avatar_url: ctx.payload.sender?.avatar_url
     }
+  }
+
+  const rawdata = JSON.stringify(temlpateData)
+  const content = JSON.stringify(JSON.parse(rawdata), (_, value) => {
+    if (typeof value !== 'string') return value
+    return value.replace(/\$\{?\$root\.([\w.]+)\}?/g, (_, path) => {
+      const resolved = path
+        .split('.')
+        .reduce((o: Record<string, unknown>, k: string) => o?.[k], data)
+      return resolved != null ? String(resolved) : ''
+    })
   })
 
   const webhookBody = {
