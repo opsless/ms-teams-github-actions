@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import {Template} from 'adaptivecards-templating'
+import { Template } from 'adaptivecards-templating'
 
 const temlpateData = {
   type: 'AdaptiveCard',
@@ -77,7 +77,7 @@ const temlpateData = {
 }
 
 async function sleep(ms: number): Promise<unknown> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     setTimeout(resolve, ms)
   })
 }
@@ -121,10 +121,10 @@ const send = async () => {
 
   const jobs = jobList.data.jobs
 
-  const job = jobs.find(j => j.name.startsWith(ctx.job))
+  const job = jobs.find((j) => j.name.startsWith(ctx.job))
 
   const stoppedStep = job?.steps?.find(
-    s =>
+    (s) =>
       s.conclusion === Conclusions.FAILURE ||
       s.conclusion === Conclusions.TIMED_OUT ||
       s.conclusion === Conclusions.TIMED_OUT ||
@@ -132,7 +132,7 @@ const send = async () => {
   )
   const lastStep = stoppedStep
     ? stoppedStep
-    : job?.steps?.reverse().find(s => s.status === StepStatus.COMPLETED)
+    : job?.steps?.reverse().find((s) => s.status === StepStatus.COMPLETED)
 
   const wr = await o.rest.actions.getWorkflowRun({
     owner: ctx.repo.owner,
@@ -210,7 +210,7 @@ const send = async () => {
   const response = await fetch(webhookUri, {
     method: 'POST',
     body: JSON.stringify(webhookBody),
-    headers: {'Content-Type': 'application/json'},
+    headers: { 'Content-Type': 'application/json' },
     signal: controller.signal
   })
 
@@ -226,25 +226,28 @@ const send = async () => {
   if (responseText) {
     try {
       responseData = JSON.parse(responseText)
-    } catch (e) {
+    } catch {
       core.warning(`Failed to parse response as JSON: ${responseText}`)
-      responseData = {text: responseText}
+      responseData = { text: responseText }
     }
   } else {
-    responseData = {message: 'Empty response received'}
+    responseData = { message: 'Empty response received' }
   }
 
   clearTimeout(id)
   core.info(JSON.stringify(responseData))
 }
 
-async function run() {
+export async function run(): Promise<void> {
   try {
     await send()
-  } catch (error: any) {
-    core.error(error)
-    core.setFailed(error.message)
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      core.error(error.message)
+      core.setFailed(error.message)
+    } else {
+      core.error(String(error))
+      core.setFailed(String(error))
+    }
   }
 }
-
-run()
