@@ -30,7 +30,7 @@ const baseData: CardData = {
 function commitFactValue(body: unknown): string {
   const attachment = (
     body as {
-      attachments: Array<{content: {body: Array<{facts?: Array<{value: string}>}>}}>
+      attachments: {content: {body: {facts?: {value: string}[]}[]}}[]
     }
   ).attachments[0]
   const factSet = attachment.content.body.find(b => b.facts !== undefined)
@@ -43,7 +43,7 @@ function commitFactValue(body: unknown): string {
 function workflowTitleText(body: unknown): string {
   const text = (
     body as {
-      attachments: Array<{content: {body: Array<{text: string}>}}>
+      attachments: {content: {body: {text: string}[]}}[]
     }
   ).attachments[0].content.body[0].text
   return text
@@ -78,8 +78,11 @@ describe('buildWebhookBody', () => {
   // which corrupted the JSON whenever a value contained a `"` or `\`. These
   // tests pin the contract that the webhook body is always serialisable.
   describe('JSON safety with commit messages containing special characters', () => {
-    const cases: Array<{name: string; message: string}> = [
-      {name: 'double quotes (original bug)', message: 'build: fix "quoted" task'},
+    const cases: {name: string; message: string}[] = [
+      {
+        name: 'double quotes (original bug)',
+        message: 'build: fix "quoted" task'
+      },
       {name: 'backslashes', message: 'fix: path\\with\\backslashes'},
       {name: 'trailing backslash', message: 'fix: trailing backslash \\'},
       {
@@ -88,18 +91,23 @@ describe('buildWebhookBody', () => {
       },
       {name: 'tab character', message: 'chore: tabbed\tmessage'},
       {name: 'carriage return', message: 'chore: carriage\rreturn'},
-      {name: 'newline (first line kept by caller)', message: 'feat: subject\nbody'},
+      {
+        name: 'newline (first line kept by caller)',
+        message: 'feat: subject\nbody'
+      },
       {name: 'single quotes', message: "feat: 'single' quotes"},
       {name: 'square and angle brackets', message: 'fix: <script> [BRACKET]'},
       {name: 'emoji', message: 'feat: ship it 🚀'},
       {name: 'non-ASCII (CJK)', message: 'feat: 日本語 中文 한국어'},
       {name: 'JSON-like braces', message: 'fix: {"json": "looking"} thing'},
-      {name: 'literal template expression', message: 'fix: ${1+1} not evaluated'},
+      {
+        name: 'literal template expression',
+        message: 'fix: ${1+1} not evaluated'
+      },
       {
         name: 'JSONata-style binding',
         message: 'fix: ${$root.commit.message} not evaluated'
       },
-      {name: 'empty string', message: ''},
       {name: 'plain ASCII baseline', message: 'fix: nothing fancy here'}
     ]
 
@@ -115,10 +123,18 @@ describe('buildWebhookBody', () => {
 
         const parsed = JSON.parse(serialised)
         const firstLine = message.split('\n')[0]
-        if (firstLine.length > 0) {
-          expect(commitFactValue(parsed)).toContain(firstLine)
-        }
+        expect(commitFactValue(parsed)).toContain(firstLine)
       })
+    })
+
+    it('produces JSON-roundtrippable body when commit message is empty', () => {
+      const body = buildWebhookBody({
+        ...baseData,
+        commit: {...baseData.commit, message: ''}
+      })
+
+      const serialised = JSON.stringify(body)
+      expect(() => JSON.parse(serialised)).not.toThrow()
     })
 
     it('does NOT evaluate ${...} expressions in the commit message', () => {
@@ -171,11 +187,7 @@ describe('buildWebhookBody', () => {
   })
 
   describe('JSON safety with repository.name containing special characters', () => {
-    const names = [
-      'org/"quoted"/repo',
-      'fork\\slash',
-      '組織/リポジトリ'
-    ]
+    const names = ['org/"quoted"/repo', 'fork\\slash', '組織/リポジトリ']
 
     names.forEach(name => {
       it(`produces JSON-roundtrippable body for repository name: ${JSON.stringify(name)}`, () => {
@@ -191,7 +203,6 @@ describe('buildWebhookBody', () => {
 })
 
 function bodyContent(body: unknown): {type: string; version: string} {
-  return (
-    body as {attachments: Array<{content: {type: string; version: string}}>}
-  ).attachments[0].content
+  return (body as {attachments: {content: {type: string; version: string}}[]})
+    .attachments[0].content
 }

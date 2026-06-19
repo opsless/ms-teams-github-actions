@@ -103,12 +103,12 @@ export interface CardData {
 
 export interface WebhookBody {
   type: 'message'
-  attachments: Array<{
+  attachments: {
     contentType: string
     // adaptivecards-templating expands to a plain object; we keep it opaque so
     // callers can `JSON.stringify` without us making assumptions about the shape.
     content: unknown
-  }>
+  }[]
 }
 
 // Pass the template as an object: stringifying it first would cause raw
