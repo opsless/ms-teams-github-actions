@@ -1,80 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import {Template} from 'adaptivecards-templating'
-
-const temlpateData = {
-  type: 'AdaptiveCard',
-  body: [
-    {
-      type: 'TextBlock',
-      size: 'large',
-      weight: 'bolder',
-      text: "Workflow '${$root.workflow.name}' #${$root.workflow.run_number} ${$root.workflow.conclusion}",
-      color: '${$root.workflow.conclusion_color}',
-      fontType: 'Default',
-      separator: true
-    },
-    {
-      type: 'TextBlock',
-      text: 'on [${$root.repository.name}](${$root.repository.html_url})',
-      wrap: true,
-      spacing: 'None'
-    },
-    {
-      type: 'ColumnSet',
-      columns: [
-        {
-          type: 'Column',
-          items: [
-            {
-              type: 'Image',
-              style: 'Person',
-              url: '${$root.author.avatar_url}',
-              size: 'Medium'
-            }
-          ],
-          width: 'auto'
-        },
-        {
-          type: 'Column',
-          items: [
-            {
-              type: 'TextBlock',
-              weight: 'Bolder',
-              text: '[${$root.author.username}](${$root.author.html_url})',
-              wrap: true
-            }
-          ],
-          width: 'stretch'
-        }
-      ],
-      spacing: 'Medium'
-    },
-    {
-      type: 'FactSet',
-      facts: [
-        {
-          title: 'Commit',
-          value: '[${$root.commit.message}](${$root.commit.html_url})'
-        },
-        {
-          title: '${$root.event.type}',
-          value: '[${$root.event.html_url}](${$root.event.html_url})'
-        },
-        {
-          title: 'Workflow run details',
-          value:
-            '[${$root.workflow.run_html_url}](${$root.workflow.run_html_url})'
-        }
-      ],
-      height: 'stretch',
-      separator: true,
-      spacing: 'Medium'
-    }
-  ],
-  $schema: 'http://adaptivecards.io/schemas/adaptive-card.json',
-  version: '1.4'
-}
+import {buildWebhookBody, CardData} from './card'
 
 async function sleep(ms: number): Promise<unknown> {
   return new Promise(resolve => {
@@ -157,51 +83,37 @@ const send = async () => {
         ? TextBlockColor.Warning
         : TextBlockColor.Attention
 
-  // Pass the template as an object: stringifying it first would cause raw
-  // textual substitution inside a JSON string and produce invalid JSON
-  // when a value (e.g. a commit message) contains a `"` or `\`.
-  const template = new Template(temlpateData)
-  const content = template.expand({
-    $root: {
-      repository: {
-        name: ctx.payload.repository?.full_name,
-        html_url: ctx.payload.repository?.html_url
-      },
-      commit: {
-        message: commit_message,
-        html_url: `${wr.data.repository.html_url}/commit/${wr.data.head_sha}`
-      },
-      workflow: {
-        name: ctx.workflow,
-        conclusion,
-        conclusion_color,
-        run_number: ctx.runNumber,
-        run_html_url: wr.data.html_url
-      },
-      event: {
-        type: ctx.eventName === 'pull_request' ? 'Pull request' : 'Branch',
-        html_url:
-          ctx.eventName === 'pull_request'
-            ? ctx.payload.pull_request?.html_url
-            : `${ctx.payload.repository?.html_url}/tree/${ctx.ref}`
-      },
-      author: {
-        username: ctx.payload.sender?.login,
-        html_url: ctx.payload.sender?.html_url,
-        avatar_url: ctx.payload.sender?.avatar_url
-      }
+  const cardData: CardData = {
+    repository: {
+      name: ctx.payload.repository?.full_name,
+      html_url: ctx.payload.repository?.html_url
+    },
+    commit: {
+      message: commit_message,
+      html_url: `${wr.data.repository.html_url}/commit/${wr.data.head_sha}`
+    },
+    workflow: {
+      name: ctx.workflow,
+      conclusion,
+      conclusion_color,
+      run_number: ctx.runNumber,
+      run_html_url: wr.data.html_url
+    },
+    event: {
+      type: ctx.eventName === 'pull_request' ? 'Pull request' : 'Branch',
+      html_url:
+        ctx.eventName === 'pull_request'
+          ? ctx.payload.pull_request?.html_url
+          : `${ctx.payload.repository?.html_url}/tree/${ctx.ref}`
+    },
+    author: {
+      username: ctx.payload.sender?.login,
+      html_url: ctx.payload.sender?.html_url,
+      avatar_url: ctx.payload.sender?.avatar_url
     }
-  })
-
-  const webhookBody = {
-    type: 'message',
-    attachments: [
-      {
-        contentType: 'application/vnd.microsoft.card.adaptive',
-        content
-      }
-    ]
   }
+
+  const webhookBody = buildWebhookBody(cardData)
 
   core.info(JSON.stringify(webhookBody))
 
