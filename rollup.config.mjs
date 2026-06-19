@@ -16,7 +16,8 @@ const config = {
   plugins: [
     esbuild({
       target: 'es2022',
-      tsconfig: './tsconfig.json'
+      tsconfig: './tsconfig.json',
+      minify: true
     }),
     nodeResolve({preferBuiltins: true}),
     json({preferConst: true}),
