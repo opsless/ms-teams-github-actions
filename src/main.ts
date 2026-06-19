@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import {buildWebhookBody, CardData} from './card'
+import {buildWebhookBody, CardData} from './card.js'
 
 async function sleep(ms: number): Promise<unknown> {
   return new Promise(resolve => {

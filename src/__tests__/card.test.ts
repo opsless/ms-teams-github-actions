@@ -1,4 +1,4 @@
-import {buildWebhookBody, CardData} from '../card'
+import {buildWebhookBody, CardData} from '../card.js'
 
 const baseData: CardData = {
   repository: {
