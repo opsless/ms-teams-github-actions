@@ -157,8 +157,10 @@ const send = async () => {
         ? TextBlockColor.Warning
         : TextBlockColor.Attention
 
-  const rawdata = JSON.stringify(temlpateData)
-  const template = new Template(rawdata)
+  // Pass the template as an object: stringifying it first would cause raw
+  // textual substitution inside a JSON string and produce invalid JSON
+  // when a value (e.g. a commit message) contains a `"` or `\`.
+  const template = new Template(temlpateData)
   const content = template.expand({
     $root: {
       repository: {
@@ -196,7 +198,7 @@ const send = async () => {
     attachments: [
       {
         contentType: 'application/vnd.microsoft.card.adaptive',
-        content: JSON.parse(content)
+        content
       }
     ]
   }
