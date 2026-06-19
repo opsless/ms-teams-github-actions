@@ -140,7 +140,7 @@ const send = async () => {
   if (responseText) {
     try {
       responseData = JSON.parse(responseText)
-    } catch (e) {
+    } catch {
       core.warning(`Failed to parse response as JSON: ${responseText}`)
       responseData = {text: responseText}
     }
@@ -155,9 +155,10 @@ const send = async () => {
 async function run() {
   try {
     await send()
-  } catch (error: any) {
-    core.error(error)
-    core.setFailed(error.message)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    core.error(message)
+    core.setFailed(message)
   }
 }
 
