@@ -1,13 +1,21 @@
-// Jest 30 configuration. Uses ts-jest preset; jest-circus is the default
-// test runner since Jest 27, so the explicit `testRunner` line was dropped.
-// Stays CommonJS (`module.exports`) because package.json has no `"type": "module"`.
-
 /** @type {import('ts-jest').JestConfigWithTsJest} */
-module.exports = {
+export default {
   clearMocks: true,
-  preset: 'ts-jest',
+  extensionsToTreatAsEsm: ['.ts'],
   moduleFileExtensions: ['ts', 'js'],
+  preset: 'ts-jest',
+  resolver: 'ts-jest-resolver',
   testEnvironment: 'node',
   testMatch: ['**/__tests__/**/*.test.ts'],
+  testPathIgnorePatterns: ['/dist/', '/node_modules/'],
+  transform: {
+    '^.+\\.ts$': [
+      'ts-jest',
+      {
+        tsconfig: 'tsconfig.json',
+        useESM: true
+      }
+    ]
+  },
   verbose: true
 }
